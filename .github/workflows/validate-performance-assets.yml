@@ -106,45 +106,49 @@ jobs:
           name: ci-smoke-test-artifacts
           path: artifacts/
 
-      - name: Send success email
+      - name: Notify Slack on success
         if: success()
-        uses: dawidd6/action-send-mail@v3
+        uses: slackapi/slack-github-action@v1.27.0
         with:
-          server_address: ${{ secrets.MAIL_SERVER }}
-          server_port: ${{ secrets.MAIL_PORT }}
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          to: ${{ secrets.MAIL_TO }}
-          from: ${{ secrets.MAIL_FROM }}
-          subject: "✅ Performance Tests Passed — ${{ github.repository }} (${{ github.ref_name }})"
-          body: |
-            All 5 JMeter smoke tests passed successfully.
+          payload: |
+            {
+              "text": "✅ *Performance Tests Passed*",
+              "attachments": [
+                {
+                  "color": "good",
+                  "fields": [
+                    { "title": "Repository", "value": "${{ github.repository }}", "short": true },
+                    { "title": "Branch", "value": "${{ github.ref_name }}", "short": true },
+                    { "title": "Commit", "value": "${{ github.sha }}", "short": false },
+                    { "title": "Scenarios", "value": "baseline, load, peak, stress, endurance", "short": false },
+                    { "title": "Run", "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}", "short": false }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
-            Repository : ${{ github.repository }}
-            Branch     : ${{ github.ref_name }}
-            Commit     : ${{ github.sha }}
-            Run        : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-            Scenarios executed: baseline, load, peak, stress, endurance
-            Artifacts (reports + results) are available on the Actions run page above.
-
-      - name: Send failure email
+      - name: Notify Slack on failure
         if: failure()
-        uses: dawidd6/action-send-mail@v3
+        uses: slackapi/slack-github-action@v1.27.0
         with:
-          server_address: ${{ secrets.MAIL_SERVER }}
-          server_port: ${{ secrets.MAIL_PORT }}
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          to: ${{ secrets.MAIL_TO }}
-          from: ${{ secrets.MAIL_FROM }}
-          subject: "❌ Performance Tests Failed — ${{ github.repository }} (${{ github.ref_name }})"
-          body: |
-            One or more steps in the performance testing pipeline have failed.
-
-            Repository : ${{ github.repository }}
-            Branch     : ${{ github.ref_name }}
-            Commit     : ${{ github.sha }}
-            Run        : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-            Please review the failed steps on the Actions run page above.
+          payload: |
+            {
+              "text": "❌ *Performance Tests Failed*",
+              "attachments": [
+                {
+                  "color": "danger",
+                  "fields": [
+                    { "title": "Repository", "value": "${{ github.repository }}", "short": true },
+                    { "title": "Branch", "value": "${{ github.ref_name }}", "short": true },
+                    { "title": "Commit", "value": "${{ github.sha }}", "short": false },
+                    { "title": "Run", "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}", "short": false }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

@@ -115,7 +115,7 @@ jobs:
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
           to: ${{ secrets.MAIL_TO }}
-          from: ${{ secrets.MAIL_USERNAME }}
+          from: ${{ secrets.MAIL_FROM }}
           subject: "✅ Performance Tests Passed — ${{ github.repository }} (${{ github.ref_name }})"
           body: |
             All 5 JMeter smoke tests passed successfully.
@@ -137,7 +137,7 @@ jobs:
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
           to: ${{ secrets.MAIL_TO }}
-          from: ${{ secrets.MAIL_USERNAME }}
+          from: ${{ secrets.MAIL_FROM }}
           subject: "❌ Performance Tests Failed — ${{ github.repository }} (${{ github.ref_name }})"
           body: |
             One or more steps in the performance testing pipeline have failed.

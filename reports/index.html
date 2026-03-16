@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Performance Testing Reports</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4efe6;
+      --panel: rgba(255, 252, 247, 0.92);
+      --text: #1d2a33;
+      --muted: #5a6a75;
+      --accent: #0f766e;
+      --accent-dark: #115e59;
+      --border: rgba(29, 42, 51, 0.12);
+      --shadow: 0 18px 48px rgba(29, 42, 51, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.16), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(180, 83, 9, 0.16), transparent 28%),
+        linear-gradient(160deg, #f8f2e8 0%, #efe6d7 100%);
+      min-height: 100vh;
+    }
+
+    main {
+      width: min(1080px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 4rem 0 5rem;
+    }
+
+    .hero {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .eyebrow {
+      margin: 0 0 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.8rem;
+      color: var(--accent-dark);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      line-height: 0.95;
+    }
+
+    .lead {
+      margin: 1rem 0 0;
+      max-width: 58rem;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.7;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 1.25rem;
+      min-height: 220px;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+      box-shadow: 0 10px 24px rgba(29, 42, 51, 0.08);
+    }
+
+    .card:hover,
+    .card:focus-visible {
+      transform: translateY(-4px);
+      border-color: rgba(15, 118, 110, 0.35);
+      box-shadow: 0 18px 32px rgba(15, 118, 110, 0.14);
+      outline: none;
+    }
+
+    .card h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.5rem;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .label {
+      display: inline-block;
+      margin-top: 1.25rem;
+      color: var(--accent-dark);
+      font-weight: bold;
+    }
+
+    footer {
+      margin-top: 1.5rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">GitHub Pages Dashboard</p>
+      <h1>Performance Testing Reports</h1>
+      <p class="lead">
+        Browse the generated Apache JMeter dashboards for each test scenario. These reports summarize response times,
+        throughput, errors, and time-series behavior captured during baseline, load, peak, and stress runs.
+      </p>
+
+      <div class="grid">
+        <a class="card" href="baseline/index.html">
+          <h2>Baseline</h2>
+          <p>Reference measurements for the system under the lightest planned load profile.</p>
+          <span class="label">Open report</span>
+        </a>
+
+        <a class="card" href="load/index.html">
+          <h2>Load</h2>
+          <p>Expected traffic behavior used to confirm stable response times and throughput.</p>
+          <span class="label">Open report</span>
+        </a>
+
+        <a class="card" href="peak/index.html">
+          <h2>Peak</h2>
+          <p>Short-duration high-volume testing used to inspect performance under traffic spikes.</p>
+          <span class="label">Open report</span>
+        </a>
+
+        <a class="card" href="stress/index.html">
+          <h2>Stress</h2>
+          <p>Upper-bound pressure testing focused on saturation points and degraded-system behavior.</p>
+          <span class="label">Open report</span>
+        </a>
+      </div>
+
+      <footer>
+        The report content is deployed automatically from the <code>reports/</code> directory by GitHub Actions.
+      </footer>
+    </section>
+  </main>
+</body>
+</html>

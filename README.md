@@ -49,6 +49,41 @@ Open any generated dashboard in a browser, for example:
 
 These dashboards contain response time trends, throughput charts, over-time views, and summary statistics for each run.
 
+## GitHub Actions CI/CD
+
+This repository now includes a single GitHub Actions workflow for both validation and deployment:
+
+- `validate-performance-assets.yml`: Runs validation on pushes, pull requests, and manual dispatch, then deploys the `reports/` folder to GitHub Pages when changes are pushed to `main`.
+
+### CI behavior
+
+The validation workflow checks that:
+
+- `Performance_Testing.jmx` exists and is valid XML.
+- Each scenario report folder exists.
+- Each scenario contains `index.html` and `statistics.json`.
+- Each scenario has a matching `.jtl` file under `results/`.
+
+It also uploads the `reports/` directory as a workflow artifact for easy download from the Actions run.
+
+### CD behavior
+
+The deployment workflow publishes the generated dashboards to GitHub Pages. The published landing page is `reports/index.html`, which links to the scenario dashboards.
+
+Expected GitHub Pages URL:
+
+```text
+https://regency-14.github.io/Performance-Testing/
+```
+
+### GitHub setup required
+
+In the repository settings on GitHub:
+
+1. Open `Settings` > `Pages`.
+2. Set the source to `GitHub Actions` if it is not already selected.
+3. Push to `main` or manually run the deployment workflow.
+
 ## Suggested Workflow
 
 1. Update or review the test plan in `Performance_Testing.jmx`.

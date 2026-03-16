@@ -51,9 +51,9 @@ These dashboards contain response time trends, throughput charts, over-time view
 
 ## GitHub Actions CI/CD
 
-This repository now includes a single GitHub Actions workflow for validation:
+This repository now includes a single GitHub Actions workflow for validation and a lightweight CI execution:
 
-- `validate-performance-assets.yml`: Runs validation on pushes, pull requests, and manual dispatch for the JMeter plan and generated report assets.
+- `validate-performance-assets.yml`: Runs validation on pushes, pull requests, and manual dispatch for the JMeter plan and generated report assets, then executes a reduced JMeter smoke run in CI.
 
 ### CI behavior
 
@@ -65,6 +65,22 @@ The validation workflow checks that:
 - Each scenario has a matching `.jtl` file under `results/`.
 
 It also uploads the `reports/` directory as a workflow artifact for easy download from the Actions run.
+
+### CI test execution
+
+The pipeline also runs JMeter directly in GitHub Actions.
+
+- On `push` and `pull_request`, it runs a smoke version of the `baseline` scenario.
+- On `workflow_dispatch`, you can choose `baseline`, `load`, `peak`, `stress`, or `endurance` as the source thread-group template.
+- The selected scenario is automatically reduced to safe CI settings: `1` user, `1` second ramp-up, and `1` loop.
+
+This keeps the workflow useful for validation without turning GitHub-hosted runners into a real load-generation environment.
+
+The workflow uploads these generated CI artifacts:
+
+- The temporary CI-ready `.jmx` file.
+- The `.jtl` results from the workflow run.
+- The generated HTML dashboard for that CI smoke execution.
 
 ## Suggested Workflow
 

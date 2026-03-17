@@ -106,22 +106,103 @@ jobs:
           name: ci-smoke-test-artifacts
           path: artifacts/
 
+      - name: Build Slack performance summary table
+        if: always()
+        id: slack_table
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          import json
+          from pathlib import Path
+
+          scenario_meta = [
+              ("baseline", "Baseline", "50"),
+              ("load", "Load", "150"),
+              ("peak", "Peak", "300"),
+              ("stress", "Stress", "500"),
+              ("endurance", "Endurance", "50 (10min)"),
+          ]
+
+          rows = []
+          for key, label, users in scenario_meta:
+              stats_file = Path("reports") / key / "statistics.json"
+              if not stats_file.exists():
+                  rows.append((label, users, "-", "-", "-", "-"))
+                  continue
+
+              with stats_file.open("r", encoding="utf-8") as handle:
+                  data = json.load(handle)
+
+              total = data.get("Total", {})
+              samples = int(total.get("sampleCount", 0))
+              errors = int(total.get("errorCount", 0))
+              error_pct = float(total.get("errorPct", 0.0))
+              mean_rt = float(total.get("meanResTime", 0.0))
+              rows.append(
+                  (
+                      label,
+                      users,
+                      str(samples),
+                      str(errors),
+                      f"{error_pct:.2f}%",
+                      f"{mean_rt:.0f}ms",
+                  )
+              )
+
+          headers = ("Test", "Users", "Samples", "Errors", "Error %", "Avg RT")
+          widths = [max(len(headers[i]), *(len(row[i]) for row in rows)) for i in range(len(headers))]
+
+          def fmt_row(values):
+              aligned = [values[0].ljust(widths[0])]
+              aligned.extend(values[i].rjust(widths[i]) for i in range(1, len(values)))
+              return "| " + " | ".join(aligned) + " |"
+
+          divider = "|-" + "-|-".join("-" * widths[i] for i in range(len(widths))) + "-|"
+          table_lines = [fmt_row(headers), divider]
+          table_lines.extend(fmt_row(row) for row in rows)
+          table_text = "\n".join(table_lines)
+
+          output_path = Path(os.environ["GITHUB_OUTPUT"])
+          with output_path.open("a", encoding="utf-8") as output:
+              output.write("table<<EOF\n")
+              output.write(table_text)
+              output.write("\nEOF\n")
+          PY
+
       - name: Notify Slack on success
         if: success()
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
             {
-              "text": "✅ *Performance Tests Passed*",
-              "attachments": [
+              "text": "Demoblaze Performance Test Results - Run #${{ github.run_number }}",
+              "blocks": [
                 {
-                  "color": "good",
-                  "fields": [
-                    { "title": "Repository", "value": "${{ github.repository }}", "short": true },
-                    { "title": "Branch", "value": "${{ github.ref_name }}", "short": true },
-                    { "title": "Commit", "value": "${{ github.sha }}", "short": false },
-                    { "title": "Scenarios", "value": "baseline, load, peak, stress, endurance", "short": false },
-                    { "title": "Run", "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}", "short": false }
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Demoblaze Performance Test Results - Run #${{ github.run_number }}*"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "```\n${{ steps.slack_table.outputs.table }}\n```"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Full Reports"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
                   ]
                 }
               ]
@@ -136,15 +217,33 @@ jobs:
         with:
           payload: |
             {
-              "text": "❌ *Performance Tests Failed*",
-              "attachments": [
+              "text": "Demoblaze Performance Test Results - Run #${{ github.run_number }}",
+              "blocks": [
                 {
-                  "color": "danger",
-                  "fields": [
-                    { "title": "Repository", "value": "${{ github.repository }}", "short": true },
-                    { "title": "Branch", "value": "${{ github.ref_name }}", "short": true },
-                    { "title": "Commit", "value": "${{ github.sha }}", "short": false },
-                    { "title": "Run", "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}", "short": false }
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Demoblaze Performance Test Results - Run #${{ github.run_number }}*"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Current snapshot:\n```\n${{ steps.slack_table.outputs.table }}\n```"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "Open Failed Run"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
                   ]
                 }
               ]

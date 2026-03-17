@@ -162,16 +162,12 @@ jobs:
           table_lines = [fmt_row(headers), divider]
           table_lines.extend(fmt_row(row) for row in rows)
           table_text = "\n".join(table_lines)
-            success_block_text = "```\n" + table_text + "\n```"
-            failure_block_text = "Current snapshot:\n```\n" + table_text + "\n```"
 
           output_path = Path(os.environ["GITHUB_OUTPUT"])
           with output_path.open("a", encoding="utf-8") as output:
               output.write("table<<EOF\n")
               output.write(table_text)
               output.write("\nEOF\n")
-              output.write(f"success_block_json={json.dumps(success_block_text)}\n")
-              output.write(f"failure_block_json={json.dumps(failure_block_text)}\n")
           PY
 
       - name: Notify Slack on success
@@ -193,7 +189,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": ${{ steps.slack_table.outputs.success_block_json }}
+                    "text": ${{ toJSON(format('```\n{0}\n```', steps.slack_table.outputs.table)) }}
                   }
                 },
                 {
@@ -234,7 +230,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": ${{ steps.slack_table.outputs.failure_block_json }}
+                    "text": ${{ toJSON(format('Current snapshot:\n```\n{0}\n```', steps.slack_table.outputs.table)) }}
                   }
                 },
                 {

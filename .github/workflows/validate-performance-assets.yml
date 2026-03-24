@@ -52,7 +52,7 @@ jobs:
 
           ET.parse(plan_path)
 
-          scenarios = ['baseline', 'load', 'peak', 'stress']
+          scenarios = ['light-load', 'medium-load', 'peak-load', 'stress']
           required_files = ['index.html', 'statistics.json']
           for scenario in scenarios:
               report_dir = root / 'reports' / scenario
